@@ -14,7 +14,11 @@ if debug_env != '1' and debug_env != 'true':
 
 from prompt_toolkit import print_formatted_text
 from prompt_toolkit.formatted_text import HTML
-from openhands_cli.agent_chat import run_cli_entry
+# Lazy import: provide a wrapper to avoid importing heavy dependencies at module import time
+
+def run_cli_entry(*args, **kwargs):
+    from openhands_cli.agent_chat import run_cli_entry as _run_cli_entry
+    return _run_cli_entry(*args, **kwargs)
 
 
 def _build_initial_task_from_args(args: argparse.Namespace) -> str | None:
@@ -22,7 +26,7 @@ def _build_initial_task_from_args(args: argparse.Namespace) -> str | None:
 
     --file overrides --task if both are provided.
     """
-    if getattr(args, "file", None):
+    if args.file:
         try:
             with open(args.file, "r", encoding="utf-8") as f:
                 file_content = f.read()
@@ -37,7 +41,7 @@ def _build_initial_task_from_args(args: argparse.Namespace) -> str | None:
         except Exception as e:
             # Fall back to a simple task if file cannot be read
             return f"The user attempted to share file '{args.file}', but it could not be read: {e}"
-    if getattr(args, "task", None):
+    if args.task:
         return args.task
     return None
 
@@ -75,10 +79,8 @@ def main() -> None:
     try:
         # Build optional initial message from args
         initial_task = _build_initial_task_from_args(args)
-        if initial_task is not None:
-            os.environ["OPENHANDS_CLI_INITIAL_TASK"] = initial_task
         # Start agent chat
-        run_cli_entry(resume_conversation_id=args.resume)
+        run_cli_entry(resume_conversation_id=args.resume, initial_user_message=initial_task)
 
     except ImportError as e:
         print_formatted_text(

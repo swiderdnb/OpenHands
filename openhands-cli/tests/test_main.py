@@ -23,8 +23,8 @@ class TestMainEntryPoint:
         # Should complete without raising an exception (graceful exit)
         simple_main.main()
 
-        # Should call run_cli_entry with no resume conversation ID
-        mock_run_agent_chat.assert_called_once_with(resume_conversation_id=None)
+        # Should call run_cli_entry with no resume conversation ID and no initial message
+        mock_run_agent_chat.assert_called_once_with(resume_conversation_id=None, initial_user_message=None)
 
     @patch('openhands_cli.simple_main.run_cli_entry')
     @patch('sys.argv', ['openhands-cli'])
@@ -88,5 +88,5 @@ class TestMainEntryPoint:
         # Should complete without raising an exception (graceful exit)
         simple_main.main()
 
-        # Should call run_cli_entry with the provided resume conversation ID
-        mock_run_agent_chat.assert_called_once_with(resume_conversation_id='test-conversation-id')
+        # Should call run_cli_entry with the provided resume conversation ID and no initial message
+        mock_run_agent_chat.assert_called_once_with(resume_conversation_id='test-conversation-id', initial_user_message=None)
